@@ -25,3 +25,5 @@ yarn-error.log*
 
 .firebasebuild/
 build/
+
+auto_commit.sh

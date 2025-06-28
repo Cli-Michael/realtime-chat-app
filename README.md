@@ -1,52 +1,65 @@
-# Chat app
+💬 Chat App — Real-time Messaging with Firebase & React
 
-## Overview
+A sleek, responsive real-time chat application built with React and Firebase. It supports public and private chat rooms, real-time messaging, push notifications, and user presence tracking.
 
-Real-time chat with rooms, message likes, social media auth, role-based permissions,
-file upload, audio messages and real-time notifications.
+✨ Features
 
-Stack:
+✅ Firebase Authentication for secure login  
+✅ Real-time chat powered by Firebase Realtime Database  
+✅ Online/offline presence indicators  
+✅ Profile avatar uploads using Firebase Storage  
+✅ Push notifications via Firebase Cloud Messaging (FCM)  
+✅ Modular and reusable React components  
+✅ Clean SCSS styling and theming support  
 
-- React
-- Firebase (realtime database, FCM, cloud functions)
-- Styles with Sass and Rsuite
+🧰 Tech Stack
 
-## Develop and run locally
+⚛️ React (Hooks + Context API)  
+🔥 Firebase (Auth, Database, Functions, Storage, Messaging)  
+🎨 SCSS (modular styling)  
+🧹 ESLint + Prettier for code quality and formatting  
 
-### Pull and install
+📁 Project Structure
 
-1. Clone this repo by running `git clone https://github.com/shelooks16/chat-app.git`
-2. Install dependencies for both cloud functions and React frontend by running `npm install && cd functions && npm install`
+📂 public/ – Static assets (favicon, index.html, logos, manifest)  
+📂 src/ – React app source code  
+   ├── App.js / index.js – App entry  
+   ├── components/ – Shared UI + chat modules  
+   ├── context/ – Context for global state (profile, room, etc.)  
+   ├── misc/ – Custom hooks, Firebase config, utilities  
+   ├── pages/ – Sign-in page and chat view  
+   └── styles/ – SCSS styling and overrides  
+📂 functions/ – Firebase Cloud Functions backend  
+📂 build/ – Production build output (ignored in version control)  
+📝 Configs – .gitignore, .eslintrc, .prettierrc, firebase.json, etc.  
 
-### Important
+🚀 Getting Started
 
-Developed using Node v10. However, if you have one of the latest Node
-versions, you can easily have dependecy-related errors (when running npm run start),
-for example with `node-sass`. Feel free to update conflict packages to versions with no conflicts.
+📦 Clone the repository and install dependencies:  
+git clone https://github.com/michael-clinton-sudo/realtime-chat-app.git  
+cd chat-app  
+npm install
 
-The reason for developing with Node v10 is to deploy cloud functions without any
-error. Engine.node is set to 10 inside `functions/package.json`. When deploying
-functions with different version other than 10, version conflict will pop-up.
+🔐 Configure Firebase credentials:  
+Update `src/misc/firebase.js` with your Firebase config.  
+Ensure `functions/service-account.json` exists (not committed).
 
-Ideally, you should have `Node Version Manager` installed to easily switch between
-different NodeJS versions.
+👨‍💻 Start the app locally:  
+npm start
 
-### Run frontend locally
+🏗️ Build and deploy:  
+npm run build  
+firebase deploy --only hosting
 
-1. Inside `src/misc/firebase.js` replace config with your firebase project config.
-2. Get FCM vapid key for real-time notificaitons from `Firebase dashboard > Cog icon > Project Settings > Cloud Messaging > Web push certificates > Key pair`
-   and put it as `fcmVapidKey` inside `src/misc/firebase.js`.
-3. Run `npm run start` and develop :)
+☁️ Deploy Cloud Functions:  
+firebase deploy --only functions
 
-If you have problems with `node-sass`, just update the package to other version.
+🔔 Push Notifications
 
-### Run functions locally
+Enable FCM in your Firebase console.  
+Generate and configure a Web Push certificate (VAPID key).  
+Update `firebase-messaging-sw.js` and `functions/src/fcm.js` with credentials.
 
-1. Download a service account from `Firebase dashboard > Cog icon > Project Settings > Service accounts > Generate new private key`.
-2. Put the file as `functions/service-account.json`
-3. Run `npm run start` from `functions`
+📄 License
 
-## Deployment
-
-1. Install firebase-cli by running `npm install -g firebase-tools`
-2. Run `firebase deploy`
+MIT License – Use freely with attribution ✌️
