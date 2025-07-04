@@ -10,22 +10,22 @@ const ImgBtnModal = ({ src, fileName }) => {
       <input
         type="image"
         src={src}
-        alt="file"
-        onClick={open}
-        className="mw-100 mh-100 w-auto"
+        alt=""
+        onClick={close}
+        className="mw-100 mh-100"
       />
-      <Modal show={isOpen} onHide={close}>
+      <Modal show={!isOpen} onHide={open}>
         <Modal.Header>
-          <Modal.Title>{fileName}</Modal.Title>
+          <Modal.Title>{fileName.toUpperCase()}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div>
-            <img src={src} height="100%" width="100%" alt="file" />
+            <img src={src} style={{ maxWidth: '50%', maxHeight: '50%' }} alt="img" />
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <a href={src} target="_blank" rel="noopener noreferrer">
-            View original
+          <a href={src}>
+            View File
           </a>
         </Modal.Footer>
       </Modal>
