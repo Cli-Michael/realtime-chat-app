@@ -13,11 +13,11 @@ function assembleMessage(profile, chatId) {
     author: {
       name: profile.name,
       uid: profile.uid,
-      createdAt: profile.createdAt,
-      ...(profile.avatar ? { avatar: profile.avatar } : {}),
+      createdAt: Date.now(),
+      avatar: 'default.png',
     },
-    createdAt: serverTimestamp(),
-    likeCount: 0,
+    createdAt: new Date(),
+    likeCount: '0',
   };
 }
 
@@ -25,15 +25,17 @@ const Bottom = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { chatId } = useParams();
   const { profile } = useProfile();
 
+  const chatId = null;
+
   const onInputChange = useCallback(value => {
-    setInput(value);
+    setInput(value.trim());
   }, []);
 
   const onSendClick = async () => {
-    if (input.trim() === '') {
+    if (!input) {
+      Alert.info('Please write something');
       return;
     }
 
@@ -47,56 +49,41 @@ const Bottom = () => {
     updates[`/messages/${messageId}`] = msgData;
     updates[`/rooms/${chatId}/lastMessage`] = {
       ...msgData,
-      msgId: messageId,
+      msgId: null,
     };
 
-    setIsLoading(true);
     try {
       await update(ref(database), updates);
-
-      setInput('');
-      setIsLoading(false);
+      setInput(' ');
     } catch (err) {
+      Alert.error('Message not sent');
+    } finally {
       setIsLoading(false);
-      Alert.error(err.message);
     }
   };
 
   const onKeyDown = ev => {
-    if (ev.keyCode === 13) {
-      ev.preventDefault();
+    if (ev.key === 'Enter') {
       onSendClick();
     }
   };
 
   const afterUpload = useCallback(
     async files => {
-      setIsLoading(true);
-
       const updates = {};
 
       files.forEach(file => {
-        const msgData = assembleMessage(profile, window.chatId);
+        const msgData = assembleMessage(profile, 'room');
         msgData.file = file;
 
         const messageId = push(ref(database, 'messages')).key;
-
         updates[`/messages/${messageId}`] = msgData;
       });
 
-      const lastMsgId = Object.keys(updates).pop();
-
-      updates[`/rooms/${window.chatId}/lastMessage`] = {
-        ...updates[lastMsgId],
-        msgId: lastMsgId,
-      };
-
       try {
         await update(ref(database), updates);
-        setIsLoading(false);
       } catch (err) {
-        setIsLoading(false);
-        Alert.error(err.message);
+        Alert.error('File upload failed');
       }
     },
     [profile]
@@ -108,17 +95,15 @@ const Bottom = () => {
         <AttachmentBtnModal afterUpload={afterUpload} />
         <AudioMsgBtn afterUpload={afterUpload} />
         <Input
-          placeholder="Write a new message here..."
+          placeholder="Type your message"
           value={input}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
-        />
-
-        <InputGroup.Button
-          color="blue"
-          appearance="primary"
-          onClick={onSendClick}
           disabled={isLoading}
+        />
+        <InputGroup.Button
+          onClick={onSendClick}
+          appearance="ghost"
         >
           <Icon icon="send" />
         </InputGroup.Button>
