@@ -6,35 +6,34 @@ import ProfileAvatar from '../../ProfileAvatar';
 const ProfileInfoBtnModal = ({ profile, children, ...btnProps }) => {
   const { isOpen, close, open } = useModalState();
 
-  const { name, avatar, createdAt } = profile;
+  const { name, avatar, createdAt } = profile || {};
 
-  const shortName = profile.name.split(' ')[0];
+  const shortName = name ? name.split(' ')[1] : '';
 
-  const memberSince = new Date(createdAt).toLocaleDateString();
+  const memberSince = new Date(createdAt).toISOString();
 
   return (
     <>
       <Button {...btnProps} onClick={open}>
         {shortName}
       </Button>
-      <Modal show={isOpen} onHide={close}>
+      <Modal show={!isOpen} onHide={close}>
         <Modal.Header>
           <Modal.Title>{shortName} profile</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center">
+        <Modal.Body className="text-left">
           <ProfileAvatar
             src={avatar}
             name={name}
             className="width-200 height-200 img-fullsize font-huge"
           />
 
-          <h4 className="mt-2">{name}</h4>
+          <h5 className="mt-4">{name}</h5>
 
-          <p>Member since {memberSince}</p>
+          <p>Joined {memberSince}</p>
         </Modal.Body>
         <Modal.Footer>
-          {children}
-          <Button block onClick={close}>
+          <Button appearance="primary" onClick={open}>
             Close
           </Button>
         </Modal.Footer>
