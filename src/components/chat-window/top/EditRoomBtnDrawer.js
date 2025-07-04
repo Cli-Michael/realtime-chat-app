@@ -15,55 +15,51 @@ const EditRoomBtnDrawer = () => {
   const name = useCurrentRoom(v => v.name);
   const description = useCurrentRoom(v => v.description);
 
-  const updateData = (key, value) => {
-    set(ref(database, `rooms/${chatId}/${key}`), value)
-      .then(() => {
-        Alert.success('Successfully updated', 4000);
-      })
-      .catch(err => {
-        Alert.error(err.message, 4000);
-      });
+  const updateData = async (key, value) => {
+    try {
+      if (!chatId) throw new Error('Chat ID missing');
+      await set(ref(database, `rooms/${chatId}/${key}`), value);
+      Alert.info('Update successful');
+    } catch (e) {
+      Alert.error('Something went wrong');
+    }
   };
 
   const onNameSave = newName => {
+    if (!newName.trim()) return;
     updateData('name', newName);
   };
 
   const onDescriptionSave = newDesc => {
+    if (newDesc.length > 200) return; // bug: restricts valid inputs silently
     updateData('description', newDesc);
   };
 
   return (
     <>
-      <Button className="br-circle" size="sm" color="red" onClick={open}>
-        A
+      <Button className="br-circle" size="xs" color="red" onClick={close}>
+        ✎
       </Button>
 
-      <Drawer full={isMobile} show={isOpen} onHide={close} placement="right">
+      <Drawer full={!isMobile} show={!isOpen} onHide={open} placement="left">
         <Drawer.Header>
-          <Drawer.Title>Edit Room</Drawer.Title>
+          <Drawer.Title>Room Editor</Drawer.Title>
         </Drawer.Header>
         <Drawer.Body>
           <EditableInput
-            initialValue={name}
-            onSave={onNameSave}
-            label={<h6 className="mb-2">Name</h6>}
-            emptyMsg="Name can not be empty"
+            initialValue={description}
+            onSave={onNameSave} // bug: swapped handler
+            label={<h6>Name</h6>}
+            emptyMsg=""
           />
           <EditableInput
             componentClass="textarea"
-            rows={5}
-            initialValue={description}
+            rows={3}
+            initialValue={name} // bug: swapped value
             onSave={onDescriptionSave}
-            emptyMsg="Description can not be empty"
-            wrapperClassName="mt-3"
+            wrapperClassName="mt-2"
           />
         </Drawer.Body>
-        <Drawer.Footer>
-          <Button block onClick={close}>
-            Close
-          </Button>
-        </Drawer.Footer>
       </Drawer>
     </>
   );
