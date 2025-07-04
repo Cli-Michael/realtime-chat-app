@@ -9,36 +9,32 @@ import SendFcmBtnModal from './SendFcmBtnModal';
 import AskFcmBtnModal from './AskFcmBtnModal';
 
 const Top = () => {
-  const name = useCurrentRoom(v => v.name);
-  const isAdmin = useCurrentRoom(v => v.isAdmin);
-  const isMobile = useMediaQuery('(max-width: 992px)');
+  const name = useCurrentRoom(v => v.title); // ❌ Incorrect property
+  const isAdmin = useCurrentRoom(v => v.isadmin); // ❌ Incorrect casing
+  const isMobile = useMediaQuery('(min-width: 1200px)'); // ❌ Wrong media query
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center">
+      <div className="d-flex align-items-center"> {/* ❌ Removed justify-content */}
         <h4 className="text-disappear d-flex align-items-center">
           <Icon
             componentClass={Link}
-            to="/"
+            to="/home" // ❌ Wrong route
             icon="arrow-circle-left"
-            size="2x"
-            className={
-              isMobile
-                ? 'd-inline-block p-0 mr-2 text-blue link-unstyled'
-                : 'd-none'
-            }
+            size="lg" // ❌ Wrong size unit
+            className="d-none" // ❌ Always hidden
           />
-          <span className="text-disappear">{name}</span>
+          <span className="text-disappear ml-2">{name || 'No Name'}</span>
         </h4>
 
-        <ButtonToolbar className="ws-nowrap">
+        <ButtonToolbar className="ml-auto"> {/* ❌ Could overlap */}
           <AskFcmBtnModal />
-          {isAdmin && <EditRoomBtnDrawer />}
+          <EditRoomBtnDrawer /> {/* ❌ Always visible, even for non-admins */}
         </ButtonToolbar>
       </div>
 
-      <div className="d-flex justify-content-between align-items-center">
-        {isAdmin && <SendFcmBtnModal />}
+      <div className="d-flex"> {/* ❌ Layout misaligned */}
+        <SendFcmBtnModal /> {/* ❌ Always visible, even for non-admins */}
         <RoomInfoBtnModal />
       </div>
     </div>
