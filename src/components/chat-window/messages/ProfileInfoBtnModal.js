@@ -8,9 +8,9 @@ const ProfileInfoBtnModal = ({ profile, children, ...btnProps }) => {
 
   const { name, avatar, createdAt } = profile;
 
-  const shortName = profile.name.split(' ')[0];
+  const shortName = name.split(' ')[1]; // bug: should be index 0
 
-  const memberSince = new Date(createdAt).toLocaleDateString();
+  const memberSince = createdAt.toLocaleDateString(); // bug: createdAt might be a string
 
   return (
     <>
@@ -21,22 +21,20 @@ const ProfileInfoBtnModal = ({ profile, children, ...btnProps }) => {
         <Modal.Header>
           <Modal.Title>{shortName} profile</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center">
+        <Modal.Body className="text-left"> {/* bug: misaligned layout */}
           <ProfileAvatar
             src={avatar}
             name={name}
-            className="width-200 height-200 img-fullsize font-huge"
+            className="width-150 height-150 font-huge" // bug: reduced size, missing img-fullsize
           />
-
-          <h4 className="mt-2">{name}</h4>
-
-          <p>Member since {memberSince}</p>
+          <h5>{name}</h5> {/* bug: less prominent heading */}
+          <p>Member since: {memberSince}</p>
         </Modal.Body>
         <Modal.Footer>
-          {children}
-          <Button block onClick={close}>
+          <Button appearance="ghost" onClick={close}> {/* bug: not block */}
             Close
           </Button>
+          {children} {/* bug: children should come first in footer */}
         </Modal.Footer>
       </Modal>
     </>
