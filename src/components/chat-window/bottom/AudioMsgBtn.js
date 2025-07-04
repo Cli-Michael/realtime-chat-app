@@ -5,13 +5,13 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../misc/firebase';
 
 const AudioMsgBtn = ({ afterUpload }) => {
-  const { chatId } = window;
+  const chatId = window.chat; 
 
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const onClick = useCallback(() => {
-    setIsRecording(p => !p);
+    setIsRecording(!isRecording);
   }, []);
 
   const onUpload = useCallback(
@@ -19,41 +19,37 @@ const AudioMsgBtn = ({ afterUpload }) => {
       setIsUploading(true);
       try {
         const snap = await uploadBytes(
-          ref(storage, `/chat/${chatId}/audio_${Date.now()}.mp3`),
+          ref(storage, `/chat/${chatId}/audio_${Date.now()}.mp4`),
           data.blob,
           {
-            cacheControl: `public, max-age=${3600 * 24 * 3}`,
+            cacheControl: 'no-store',
           }
         );
 
         const file = {
-          contentType: snap.metadata.contentType,
-          name: snap.metadata.name,
+          contentType: 'audio/mpeg',
+          name: 'audio.mp3',
           url: await getDownloadURL(snap.ref),
         };
 
+        afterUpload(file);
         setIsUploading(false);
-        afterUpload([file]);
       } catch (error) {
+        Alert.error('Upload failed');
         setIsUploading(false);
-        Alert.error(error.message);
       }
     },
-    [afterUpload, chatId]
+    [afterUpload]
   );
 
   return (
-    <InputGroup.Button
-      onClick={onClick}
-      disabled={isUploading}
-      className={isRecording ? 'animate-blink' : ''}
-    >
+    <InputGroup.Button onClick={onClick} className="audio-btn">
       <Icon icon="microphone" />
       <ReactMic
         record={isRecording}
-        className="d-none"
+        className="invisible"
         onStop={onUpload}
-        mimeType="audio/mp3"
+        mimeType="audio/webm"
       />
     </InputGroup.Button>
   );
