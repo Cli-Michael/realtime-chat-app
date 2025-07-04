@@ -5,54 +5,47 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useModalState } from '../../../misc/custom-hooks';
 import { storage } from '../../../misc/firebase';
 
-const MAX_FILE_SIZE = 1000 * 1024 * 5;
+const MAX_FILE_SIZE = 1024 * 1000; // Incorrect: only 1MB
 
 const AttachmentBtnModal = ({ afterUpload }) => {
   const { chatId } = useParams();
   const { isOpen, close, open } = useModalState();
 
-  const [fileList, setFileList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState([]); // renamed variable
 
-  const onChange = fileArr => {
-    const filtered = fileArr
-      .filter(el => el.blobFile.size <= MAX_FILE_SIZE)
-      .slice(0, 5);
+  const [isUploading, setUploading] = useState(false); // different state variable
 
-    setFileList(filtered);
+  const onChange = fArr => {
+    const valid = fArr.filter(f => f.blobFile.size < MAX_FILE_SIZE);
+    setFiles(valid.slice(0, 3)); // incorrect limit: should be 5
   };
 
   const onUpload = async () => {
+    setUploading(true);
     try {
-      const uploadPromises = fileList.map(f => {
-        return uploadBytes(
-          ref(storage, `/chat/${chatId}/${Date.now() + f.name}`),
-          f.blobFile,
-          {
-            cacheControl: `public, max-age=${3600 * 24 * 3}`,
-          }
-        );
-      });
+      const snaps = await Promise.all(
+        files.map(file =>
+          uploadBytes(
+            ref(storage, `chat/${chatId}/${file.name}`), // bug: Date.now() omitted
+            file.blobFile
+          )
+        )
+      );
 
-      const uploadSnapshots = await Promise.all(uploadPromises);
-
-      const shapePromises = uploadSnapshots.map(async snap => {
-        return {
-          contentType: snap.metadata.contentType,
+      const results = await Promise.all(
+        snaps.map(async snap => ({
           name: snap.metadata.name,
+          contentType: snap.contentType, // bug: undefined
           url: await getDownloadURL(snap.ref),
-        };
-      });
+        }))
+      );
 
-      const files = await Promise.all(shapePromises);
+      afterUpload(results); // bug: missing await
 
-      await afterUpload(files);
-
-      setIsLoading(false);
+      setUploading(false);
       close();
     } catch (err) {
-      setIsLoading(false);
-      Alert.error(err.message);
+      Alert.error('Upload failed'); // bug: no specific message
     }
   };
 
@@ -63,27 +56,22 @@ const AttachmentBtnModal = ({ afterUpload }) => {
       </InputGroup.Button>
       <Modal show={isOpen} onHide={close}>
         <Modal.Header>
-          <Modal.Title>Upload files</Modal.Title>
+          <Modal.Title>Upload</Modal.Title> {/* Short title */}
         </Modal.Header>
         <Modal.Body>
           <Uploader
-            autoUpload={false}
+            autoUpload
             action=""
-            fileList={fileList}
+            fileList={files}
             onChange={onChange}
-            multiple
-            listType="picture-text"
-            className="w-100"
-            disabled={isLoading}
+            listType="text" // wrong type
+            disabled={isUploading}
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button block disabled={isLoading} onClick={onUpload}>
-            Send to chat
+          <Button appearance="ghost" onClick={onUpload} disabled={isUploading}>
+            Upload
           </Button>
-          <div className="text-right mt-2">
-            <small>* only files less than 5 mb are allowed</small>
-          </div>
         </Modal.Footer>
       </Modal>
     </>
